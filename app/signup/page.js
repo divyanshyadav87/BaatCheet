@@ -24,7 +24,13 @@ export default function SignupPage() {
 
   return (
     <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050508' }}>
-      <div className="glass" style={{ width: '100%', maxWidth: '420px', borderRadius: '32px', padding: '3rem', textAlign: 'center' }}>
+      <style>{`
+        @media (max-width: 480px) {
+          .auth-card { padding: 2rem 1.5rem !important; border-radius: 24px !important; width: 95% !important; }
+          .auth-title { font-size: 1.6rem !important; }
+        }
+      `}</style>
+      <div className="glass auth-card" style={{ width: '100%', maxWidth: '420px', borderRadius: '32px', padding: '3rem', textAlign: 'center' }}>
         
         {/* Logo */}
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2.5rem' }}>
@@ -34,7 +40,7 @@ export default function SignupPage() {
           <span className="gradient-text" style={{ fontWeight: '800', fontSize: '1.4rem' }}>BaatCheet</span>
         </Link>
         
-        <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem' }}>Create Account</h1>
+        <h1 className="auth-title" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem' }}>Create Account</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Start your premium social experience today</p>
         
         {/* Social Logins */}

@@ -18,6 +18,14 @@ export default function Home() {
 
   return (
     <main style={{ minHeight: '100vh' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .hero-buttons { flex-direction: column; width: 100%; padding: 0 1rem; box-sizing: border-box; }
+          .hero-buttons button { width: 100%; }
+          .pricing-pro { transform: scale(1) !important; margin-top: 1rem; margin-bottom: 1rem; }
+          .page-footer { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+      `}</style>
       <Navbar />
       
       {/* Hero Section */}
@@ -35,7 +43,7 @@ export default function Home() {
           Get smart replies, improve dating skills, and boost confidence — all powered by AI that understands Indian conversations.
         </p>
         
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
+        <div className="hero-buttons" style={{ display: 'flex', gap: '1.5rem' }}>
           <button className="gradient-bg" style={{ padding: '1.2rem 2.5rem', borderRadius: '16px', color: '#fff', fontWeight: '700', fontSize: '1.1rem', boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)' }}>
             Get Started →
           </button>
@@ -108,7 +116,7 @@ export default function Home() {
           </div>
 
           {/* Pro Tier (Highlighted) */}
-          <div className="glass" style={{ 
+          <div className="glass pricing-pro" style={{ 
             padding: '3rem 2rem', 
             borderRadius: '24px', 
             display: 'flex', 
@@ -146,7 +154,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="container section-padding" style={{ borderTop: '1px solid var(--card-border)', marginTop: '5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+      <footer className="container section-padding page-footer" style={{ borderTop: '1px solid var(--card-border)', marginTop: '5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', color: '#fff' }}>
           ✨ BaatCheet
         </div>

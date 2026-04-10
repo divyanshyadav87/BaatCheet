@@ -131,18 +131,45 @@ export default function UploadPage() {
     { label: 'Classy', emoji: '💎' },
   ];
 
+  const mobileStyles = `
+    .enchanter-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(400px, 2fr); gap: 2rem; }
+    .bottom-bar { padding: 1.5rem 2.5rem; border-radius: 100px; display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; background: linear-gradient(90deg, rgba(30,30,40,0.8) 0%, rgba(20,20,30,0.8) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+    .bottom-text-group { display: flex; align-items: center; gap: 1.2rem; }
+    .bottom-action-group { display: flex; gap: 1rem; }
+    .enchanter-header { font-size: 3rem; font-weight: 900; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; }
+    .spell-card { padding: 2.5rem; border-radius: 24px; border: 1px solid rgba(244, 114, 182, 0.15); transition: transform 0.2s; cursor: pointer; }
+    .spell-title-group { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+    .spell-title-inner { display: flex; gap: 1.2rem; align-items: center; }
+    .upload-container { padding: 2rem; }
+    .main-wrap { padding: 2rem; width: 100%; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
+    
+    @media (max-width: 900px) {
+      .enchanter-grid { grid-template-columns: 1fr; }
+      .bottom-bar { flex-direction: column; border-radius: 32px; padding: 1.5rem; gap: 1.5rem; align-items: stretch; text-align: center; }
+      .bottom-text-group { flex-direction: column; }
+      .bottom-action-group { flex-direction: column; }
+      .bottom-action-group button { width: 100%; }
+      .enchanter-header { font-size: 2.2rem; flex-wrap: wrap; justify-content: center; text-align: center; }
+      .spell-card { padding: 1.5rem; }
+      .spell-title-group { flex-direction: column; gap: 1rem; align-items: flex-start; }
+      .main-wrap { padding: 1rem; }
+      .upload-container { padding: 1rem; }
+    }
+  `;
+
   // Rendering logic
   if (response && response.options) {
     return (
-      <div style={{ padding: '2rem', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: '900', color: '#fff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div className="main-wrap">
+        <style>{mobileStyles}</style>
+        <h1 className="enchanter-header">
           The Enchanter's <span style={{ color: '#f472b6', fontStyle: 'italic', letterSpacing: '0.05em' }}>Whispers</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '800px', lineHeight: '1.6' }}>
           Three potent distillations synthesized from the celestial vibrations of your current connection. Choose the essence that matches your intended <span style={{ color: '#a78bfa', fontWeight: 'bold' }}>Transmutation</span>.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(400px, 2fr)', gap: '2rem' }}>
+        <div className="enchanter-grid">
           
           {/* Left Column - Source Scroll */}
           <div>
@@ -176,9 +203,9 @@ export default function UploadPage() {
           {/* Right Column - Options */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {response.options.map((opt, i) => (
-              <div key={i} className="glass" style={{ padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(244, 114, 182, 0.15)', transition: 'transform 0.2s', cursor: 'pointer' }} onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.border = '1px solid rgba(244, 114, 182, 0.4)'; }} onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.border = '1px solid rgba(244, 114, 182, 0.15)'; }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                  <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
+              <div key={i} className="glass spell-card" onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.border = '1px solid rgba(244, 114, 182, 0.4)'; }} onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.border = '1px solid rgba(244, 114, 182, 0.15)'; }}>
+                <div className="spell-title-group">
+                  <div className="spell-title-inner">
                     <div className="glass" style={{ padding: '1rem', borderRadius: '16px', background: 'rgba(255,255,255,0.03)' }}>
                       {getIcon(opt.icon)}
                     </div>
@@ -207,8 +234,8 @@ export default function UploadPage() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="glass" style={{ padding: '1.5rem 2.5rem', borderRadius: '100px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', background: 'linear-gradient(90deg, rgba(30,30,40,0.8) 0%, rgba(20,20,30,0.8) 100%)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+        <div className="glass bottom-bar">
+          <div className="bottom-text-group">
             <div style={{ padding: '0.8rem', borderRadius: '50%', background: 'rgba(244,114,182,0.1)' }}>
               <Sparkles size={24} color="#f472b6" />
             </div>
@@ -217,7 +244,7 @@ export default function UploadPage() {
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic' }}>Recalibrate the reagents for a different social outcome.</p>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="bottom-action-group">
             <button onClick={() => setResponse(null)} style={{ padding: '0.8rem 1.8rem', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
               Adjust Tone
             </button>
@@ -231,7 +258,8 @@ export default function UploadPage() {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '1rem', boxSizing: 'border-box' }}>
+      <style>{mobileStyles}</style>
       <div className="glass" style={{ width: '100%', maxWidth: '600px', borderRadius: '32px', overflow: 'hidden' }}>
         {/* Header */}
         <div style={{ padding: '2rem', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -246,7 +274,7 @@ export default function UploadPage() {
            </div>
         </div>
 
-        <div style={{ padding: '2rem' }}>
+        <div className="upload-container">
           <label style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '1rem', display: 'block' }}>
             Add Screenshot (Optional)
           </label>

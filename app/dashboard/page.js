@@ -23,6 +23,16 @@ export default function DashboardHome() {
   return (
     <div>
       <header style={{ marginBottom: '3rem' }}>
+        <style>{`
+          .dash-page-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+          .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 4rem; }
+          @media (max-width: 900px) {
+            .dash-page-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 2rem; }
+            .stat-card-value { font-size: 1.6rem !important; }
+            .stat-card-label { font-size: 0.8rem !important; }
+          }
+        `}</style>
         <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.5rem' }}>
           Good evening, <span className="gradient-text">User</span> 👋
         </h1>
@@ -30,20 +40,20 @@ export default function DashboardHome() {
       </header>
 
       {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '4rem' }}>
+      <div className="stats-grid">
         {stats.map((s, i) => (
           <div key={i} className="glass" style={{ padding: '1.5rem', borderRadius: '24px' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>{s.icon}</div>
                 <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 'bold' }}>{s.change}</span>
              </div>
-             <div style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem' }}>{s.value}</div>
-             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</div>
+             <div className="stat-card-value" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem' }}>{s.value}</div>
+             <div className="stat-card-label" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div className="dash-page-grid">
         {/* Recent Activity */}
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
