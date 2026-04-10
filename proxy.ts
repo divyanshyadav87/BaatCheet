@@ -6,7 +6,7 @@ export const config = {
   matcher: ['/api/:path*'], // run only on API routes
 };
 
-export async function middleware(request: Request) {
+export async function proxy(request: Request) {
   const response = NextResponse.next();
 
   // Use server‑side Supabase client with request cookies
