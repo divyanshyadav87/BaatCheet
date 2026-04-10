@@ -12,6 +12,7 @@ export default function UploadPage() {
   const [imagePreview, setImagePreview] = useState(null);
   const [fileName, setFileName] = useState('');
   const [finalSubmittedContent, setFinalSubmittedContent] = useState('');
+  const [copiedIndex, setCopiedIndex] = useState(null);
   const fileInputRef = useRef(null);
 
   const getIcon = (iconName) => {
@@ -23,8 +24,14 @@ export default function UploadPage() {
     }
   };
 
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (text, index) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -211,8 +218,8 @@ export default function UploadPage() {
                     </div>
                     <h2 style={{ fontSize: '1.6rem', color: '#f472b6', fontWeight: 'bold' }}>{opt.name}</h2>
                   </div>
-                  <button onClick={() => handleCopy(opt.quote)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', borderRadius: '100px', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
-                    <Copy size={16} /> Copy
+                  <button onClick={() => handleCopy(opt.quote, i)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', borderRadius: '100px', background: copiedIndex === i ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)', color: copiedIndex === i ? '#10b981' : '#e2e8f0', border: copiedIndex === i ? '1px solid rgba(16, 185, 129, 0.4)' : 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem', transition: 'all 0.2s' }} onMouseOver={(e) => { if(copiedIndex !== i) e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }} onMouseOut={(e) => { if(copiedIndex !== i) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}>
+                    {copiedIndex === i ? <span style={{fontSize: '16px'}}>✓</span> : <Copy size={16} />} {copiedIndex === i ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
                 
