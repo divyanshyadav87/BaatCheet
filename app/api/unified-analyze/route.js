@@ -3,25 +3,26 @@ import { generateAIResponse } from '@/app/lib/ai';
 
 export async function POST(req) {
   try {
-    const { type, context } = await req.json();
+    const { type, context, image } = await req.json();
     
-    if (!context) {
-      return NextResponse.json({ error: 'Context text is missing. Please type some context or upload an image.' }, { status: 400 });
+    if (!context && !image) {
+      return NextResponse.json({ error: 'Please provide either text context or an image to analyze.' }, { status: 400 });
     }
 
     let prompt = '';
+    const imageHint = image ? " (Refer to the provided image for context)" : "";
     
     if (type === 'reply') {
-      prompt = `You are a charismatic, socially intelligent assistant. The user needs a reply for the following chat context:\n\n"${context}"\n\nProvide exactly 3 different, clever, and natural reply options in JSON format. The JSON should have a top-level key "suggestions" containing an array of strings. Output raw JSON only without markdown formatting.`;
+      prompt = `You are a charismatic, socially intelligent assistant. The user needs a reply for the following chat context${imageHint}:\n\n"${context || 'See image for chat history'}"\n\nProvide exactly 3 different, clever, and natural reply options in JSON format. The JSON should have a top-level key "suggestions" containing an array of strings. Output raw JSON only without markdown formatting.`;
     } else if (type === 'starter') {
-      prompt = `You are a communication and networking expert. Based on the following bio or context about a person:\n\n"${context}"\n\nProvide exactly 3 creative, engaging, and non-creepy conversation starters in JSON format. The JSON should have a top-level key "suggestions" containing an array of strings. Output raw JSON only without markdown formatting.`;
+      prompt = `You are a communication and networking expert. Based on the following bio or context about a person${imageHint}:\n\n"${context || 'See image for person details'}"\n\nProvide exactly 3 creative, engaging, and non-creepy conversation starters in JSON format. The JSON should have a top-level key "suggestions" containing an array of strings. Output raw JSON only without markdown formatting.`;
     } else if (type === 'awkward') {
-      prompt = `You are an emotionally intelligent conflict resolution expert. The user is in this awkward situation:\n\n"${context}"\n\nProvide exactly 3 different ways to respond or handle this via text to de-escalate and save face gracefully. Output in JSON format. The JSON should have a top-level key "suggestions" containing an array of strings. Output raw JSON only without markdown formatting.`;
+      prompt = `You are an emotionally intelligent conflict resolution expert. The user is in this awkward situation${imageHint}:\n\n"${context || 'See image for situation context'}"\n\nProvide exactly 3 different ways to respond or handle this via text to de-escalate and save face gracefully. Output in JSON format. The JSON should have a top-level key "suggestions" containing an array of strings. Output raw JSON only without markdown formatting.`;
     } else {
       return NextResponse.json({ error: 'Invalid analysis type' }, { status: 400 });
     }
 
-    const aiResultString = await generateAIResponse(prompt);
+    const aiResultString = await generateAIResponse(prompt, image);
     
     // We expect the AI to return a JSON string based on the prompt.
     const cleanJson = aiResultString.replace(/```json/gi, '').replace(/```/g, '').trim();

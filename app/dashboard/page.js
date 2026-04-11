@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function DashboardHome() {
   const [activeTab, setActiveTab] = useState('reply'); 
@@ -7,6 +7,10 @@ export default function DashboardHome() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  
+  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [encodedFile, setEncodedFile] = useState(null);
 
   const tabs = [
     { id: 'reply', label: 'Reply Suggestions', icon: '💬', tagline: 'Upload a chat screenshot or type the exact conversation.' },
@@ -14,8 +18,38 @@ export default function DashboardHome() {
     { id: 'awkward', label: 'Awkward Situations', icon: '😅', tagline: 'Describe the tricky situation in detail to get expert advice.' },
   ];
 
+  const handleFileSelect = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    // Validate size (5MB)
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      alert("File is too large. Max 5MB allowed.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Extract base64 part
+      const base64String = reader.result.split(',')[1];
+      setEncodedFile({
+        base64: base64String,
+        mimeType: selectedFile.type
+      });
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const clearFile = (e) => {
+    if (e) e.stopPropagation();
+    setEncodedFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleProcess = async () => {
-    if (!inputText && !file) return;
+    if (!inputText && !encodedFile) return;
     setIsLoading(true);
     setResult(null);
     
@@ -27,7 +61,7 @@ export default function DashboardHome() {
       const payload = {
         type: activeTab,
         context: inputText,
-        // file data would be sent here if handling base64, otherwise multipart/form-data
+        image: encodedFile
       };
 
       const response = await fetch('/api/unified-analyze', {
@@ -148,7 +182,7 @@ export default function DashboardHome() {
           <button
             key={tab.id}
             className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => { setActiveTab(tab.id); setResult(null); setInputText(''); setFile(null); }}
+            onClick={() => { setActiveTab(tab.id); setResult(null); setInputText(''); clearFile(); }}
           >
             <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
             {tab.label}
@@ -165,10 +199,49 @@ export default function DashboardHome() {
         <div className={`action-area ${activeTab === 'awkward' ? 'single-col' : ''}`}>
           {/* File Upload (Hidden for Awkward Situations) */}
           {activeTab !== 'awkward' && (
-            <div className="file-drop" onClick={() => alert("File upload functionality to be linked to storage bucket later.")}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📤</div>
-              <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Click or drag file here</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Supports JPG, PNG (Max 5MB)</div>
+            <div 
+              className="file-drop" 
+              onClick={() => fileInputRef.current?.click()}
+              style={{ position: 'relative', overflow: 'hidden' }}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileSelect} 
+                accept="image/*" 
+                style={{ display: 'none' }} 
+              />
+              
+              {imagePreview ? (
+                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                  <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <button 
+                    onClick={clearFile}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      background: 'rgba(239, 44, 44, 0.8)',
+                      border: 'none',
+                      color: '#fff',
+                      width: '30px',
+                      height: '30px',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      zIndex: 2
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📤</div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Click or drag file here</div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Supports JPG, PNG (Max 5MB)</div>
+                </>
+              )}
             </div>
           )}
 
@@ -188,7 +261,7 @@ export default function DashboardHome() {
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
           <button 
             className="gradient-bg" 
-            disabled={!inputText && !file || isLoading}
+            disabled={(!inputText && !encodedFile) || isLoading}
             onClick={handleProcess}
             style={{ 
               padding: '1.2rem 3rem', 
@@ -197,8 +270,8 @@ export default function DashboardHome() {
               fontWeight: '700', 
               fontSize: '1.1rem',
               border: 'none',
-              cursor: (!inputText && !file) || isLoading ? 'not-allowed' : 'pointer',
-              opacity: (!inputText && !file) || isLoading ? 0.6 : 1,
+              cursor: (!inputText && !encodedFile) || isLoading ? 'not-allowed' : 'pointer',
+              opacity: (!inputText && !encodedFile) || isLoading ? 0.6 : 1,
               boxShadow: '0 10px 30px rgba(139, 92, 246, 0.3)',
               transition: 'all 0.3s'
             }}
