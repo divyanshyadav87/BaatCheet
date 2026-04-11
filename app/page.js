@@ -1,13 +1,11 @@
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 export default function Home() {
   const features = [
-    { title: "Smart Replies", desc: "AI-generated responses that match the conversation tone perfectly.", icon: "💬" },
-    { title: "Conversation Analysis", desc: "Deep insights into your messaging patterns and social dynamics.", icon: "📊" },
-    { title: "Confidence Coach", desc: "Build social confidence with personalized AI-driven tips.", icon: "🛡️" },
-    { title: "Rizz Generator", desc: "Get witty, charming replies that keep conversations going.", icon: "⚡" },
-    { title: "Dating Assistant", desc: "Master the art of dating conversations with AI guidance.", icon: "💖" },
-    { title: "Social Score", desc: "Track your improvement with a comprehensive social skill score.", icon: "⭐" },
+    { title: "Reply Suggestions", desc: "Upload a screenshot of your chat or type the convo to get the perfect smart reply.", icon: "💬" },
+    { title: "Convo Starters", desc: "Upload a photo of a person or activity to generate the ultimate, personalized icebreaker.", icon: "🚀" },
+    { title: "Awkward Situations", desc: "Don't know what to say? Describe the tricky situation and get expert AI advice.", icon: "😅" },
   ];
 
   const testimonials = [
@@ -21,7 +19,7 @@ export default function Home() {
       <style>{`
         @media (max-width: 768px) {
           .hero-buttons { flex-direction: column; width: 100%; padding: 0 1rem; box-sizing: border-box; }
-          .hero-buttons button { width: 100%; }
+          .hero-buttons button, .hero-buttons a { width: 100%; text-align: center; }
           .pricing-pro { transform: scale(1) !important; margin-top: 1rem; margin-bottom: 1rem; }
           .page-footer { flex-direction: column; gap: 1rem; text-align: center; }
         }
@@ -40,16 +38,16 @@ export default function Home() {
         </h1>
         
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
-          Get smart replies, improve dating skills, and boost confidence — all powered by AI that understands Indian conversations.
+          Get smart replies, killer conversation starters, and expert advice for awkward texting situations — all powered by AI.
         </p>
         
         <div className="hero-buttons" style={{ display: 'flex', gap: '1.5rem' }}>
-          <button className="gradient-bg" style={{ padding: '1.2rem 2.5rem', borderRadius: '16px', color: '#fff', fontWeight: '700', fontSize: '1.1rem', boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)' }}>
+          <Link href="/login" className="gradient-bg" style={{ display: 'inline-block', padding: '1.2rem 2.5rem', borderRadius: '16px', color: '#fff', fontWeight: '700', fontSize: '1.1rem', boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)' }}>
             Get Started →
-          </button>
-          <button className="glass" style={{ padding: '1.2rem 2.5rem', borderRadius: '16px', color: '#fff', fontWeight: '600', fontSize: '1.1rem' }}>
+          </Link>
+          <Link href="/login" className="glass" style={{ display: 'inline-block', padding: '1.2rem 2.5rem', borderRadius: '16px', color: '#fff', fontWeight: '600', fontSize: '1.1rem' }}>
             Try Demo
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -112,7 +110,7 @@ export default function Home() {
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Basic suggestions</li>
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Social score</li>
             </ul>
-            <button className="glass" style={{ padding: '1rem', borderRadius: '12px', fontWeight: '600' }}>Get Started</button>
+            <Link href="/login" className="glass" style={{ display: 'block', textAlign: 'center', padding: '1rem', borderRadius: '12px', fontWeight: '600' }}>Get Started</Link>
           </div>
 
           {/* Pro Tier (Highlighted) */}
@@ -135,7 +133,7 @@ export default function Home() {
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Rizz generator</li>
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Priority support</li>
             </ul>
-            <button className="gradient-bg" style={{ padding: '1rem', borderRadius: '12px', fontWeight: '700', color: '#fff' }}>Go Pro</button>
+            <Link href="/login" className="gradient-bg" style={{ display: 'block', textAlign: 'center', padding: '1rem', borderRadius: '12px', fontWeight: '700', color: '#fff' }}>Go Pro</Link>
           </div>
 
           {/* Elite Tier */}
@@ -148,7 +146,7 @@ export default function Home() {
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Custom personality</li>
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> White-glove onboarding</li>
             </ul>
-            <button className="glass" style={{ padding: '1rem', borderRadius: '12px', fontWeight: '600' }}>Go Elite</button>
+            <Link href="/login" className="glass" style={{ display: 'block', textAlign: 'center', padding: '1rem', borderRadius: '12px', fontWeight: '600' }}>Go Elite</Link>
           </div>
         </div>
       </section>

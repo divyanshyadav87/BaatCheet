@@ -1,102 +1,251 @@
 "use client";
+import { useState } from 'react';
 
 export default function DashboardHome() {
-  const stats = [
-    { label: 'Social Score', value: '78', icon: '📊', color: '#8b5cf6', change: '+5 this week' },
-    { label: 'Chats Analyzed', value: '24', icon: '💬', color: '#10b981', change: '+3 today' },
-    { label: 'AI Suggestions', value: '156', icon: '✨', color: '#ec4899', change: '' },
-    { label: 'Daily Streak', value: '7 🔥', icon: '🔥', color: '#f59e0b', change: '' },
+  const [activeTab, setActiveTab] = useState('reply'); 
+  const [inputText, setInputText] = useState('');
+  const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const tabs = [
+    { id: 'reply', label: 'Reply Suggestions', icon: '💬', tagline: 'Upload a chat screenshot or type the exact conversation.' },
+    { id: 'starter', label: 'Convo Starters', icon: '🚀', tagline: 'Upload a photo of them/their activity or describe their bio.' },
+    { id: 'awkward', label: 'Awkward Situations', icon: '😅', tagline: 'Describe the tricky situation in detail to get expert advice.' },
   ];
 
-  const recentActivity = [
-    { name: 'Priya', platform: 'WhatsApp', score: '82%', time: '2h ago', message: 'Hey! How was your weekend?' },
-    { name: 'Arjun', platform: 'Instagram', score: '75%', time: '5h ago', message: 'That reel was amazing 😂' },
-    { name: 'Sneha', platform: 'Telegram', score: '91%', time: '1d ago', message: 'Are you free for coffee?' },
-  ];
+  const handleProcess = async () => {
+    if (!inputText && !file) return;
+    setIsLoading(true);
+    setResult(null);
+    
+    try {
+      // In a production scenario with file uploads, you would use FormData.
+      // For this unified tool, we will send everything as JSON for now (if text).
+      // A dedicated server action or API route handles the actual Gemini request.
+      
+      const payload = {
+        type: activeTab,
+        context: inputText,
+        // file data would be sent here if handling base64, otherwise multipart/form-data
+      };
 
-  const tips = [
-    { icon: '💡', text: 'Ask open-ended questions to keep conversations flowing naturally.' },
-    { icon: '💡', text: 'Mirror their energy — if they use emojis, use them too!' },
-    { icon: '💡', text: 'Don\'t double-text within 5 minutes. Give them space to respond.' },
-  ];
+      const response = await fetch('/api/unified-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setResult(data);
+      } else {
+        setResult({ error: data.error || 'Something went wrong.' });
+      }
+    } catch (e) {
+      console.error(e);
+      setResult({ error: 'Network error or server unavailable.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const currentTabInfo = tabs.find(t => t.id === activeTab);
 
   return (
     <div>
-      <header style={{ marginBottom: '3rem' }}>
-        <style>{`
-          .dash-page-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
-          .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 4rem; }
-          @media (max-width: 900px) {
-            .dash-page-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 2rem; }
-            .stat-card-value { font-size: 1.6rem !important; }
-            .stat-card-label { font-size: 0.8rem !important; }
+      <style>{`
+        .tab-button {
+          padding: 1rem 1.5rem;
+          border-radius: 16px;
+          border: 1px solid transparent;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(255, 255, 255, 0.03);
+          color: var(--text-secondary);
+        }
+        .tab-button.active {
+          background: rgba(139, 92, 246, 0.15);
+          color: #fff;
+          border-color: rgba(139, 92, 246, 0.3);
+        }
+        .tab-button:hover:not(.active) {
+          background: rgba(255, 255, 255, 0.08);
+        }
+        .action-area {
+          margin-top: 2rem;
+          display: grid;
+          gap: 2rem;
+          grid-template-columns: 1fr;
+        }
+        @media (min-width: 1024px) {
+          .action-area {
+            grid-template-columns: 1fr 1fr;
           }
-        `}</style>
+          .action-area.single-col {
+            grid-template-columns: 1fr;
+            max-width: 800px;
+            margin: 2rem auto;
+          }
+        }
+        textarea.glass-input {
+          width: 100%;
+          min-height: 200px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--card-border);
+          padding: 1.5rem;
+          border-radius: 20px;
+          color: #fff;
+          outline: none;
+          font-family: inherit;
+          font-size: 1rem;
+          resize: vertical;
+        }
+        textarea.glass-input:focus {
+          border-color: var(--accent-purple);
+        }
+        .file-drop {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.02);
+          border: 2px dashed rgba(255,255,255,0.1);
+          border-radius: 20px;
+          min-height: 200px;
+          cursor: pointer;
+          transition: all 0.3s;
+          color: var(--text-secondary);
+        }
+        .file-drop:hover {
+          border-color: var(--accent-purple);
+          background: rgba(139, 92, 246, 0.05);
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+          animation: fadeIn 0.4s ease forwards;
+        }
+      `}</style>
+      
+      <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.5rem' }}>
-          Good evening, <span className="gradient-text">User</span> 👋
+          Your <span className="gradient-text">AI Arsenal</span>
         </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Here's your social performance overview</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Select a tool to enhance your social interactions.</p>
       </header>
 
-      {/* Stats Grid */}
-      <div className="stats-grid">
-        {stats.map((s, i) => (
-          <div key={i} className="glass" style={{ padding: '1.5rem', borderRadius: '24px' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>{s.icon}</div>
-                <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 'bold' }}>{s.change}</span>
-             </div>
-             <div className="stat-card-value" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem' }}>{s.value}</div>
-             <div className="stat-card-label" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</div>
-          </div>
+      {/* Tab Selectors */}
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => { setActiveTab(tab.id); setResult(null); setInputText(''); setFile(null); }}
+          >
+            <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
+            {tab.label}
+          </button>
         ))}
       </div>
 
-      <div className="dash-page-grid">
-        {/* Recent Activity */}
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.4rem' }}>Recent Activity</h2>
-            <button style={{ color: 'var(--accent-purple)', fontWeight: '600', fontSize: '0.9rem' }}>View all</button>
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-            {recentActivity.map((activity, i) => (
-              <div key={i} className="glass" style={{ padding: '1.2rem 1.5rem', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{activity.name[0]}</div>
-                   <div>
-                     <div style={{ fontWeight: '600' }}>{activity.name} · <span style={{ fontWeight: '400', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{activity.platform}</span></div>
-                     <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{activity.message}</div>
-                   </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: '800', color: activity.score.replace('%','') > 80 ? '#10b981' : '#f59e0b' }}>{activity.score}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{activity.time}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="glass fade-in" style={{ padding: '3rem', borderRadius: '32px', border: '1px solid var(--accent-purple)', boxShadow: '0 10px 40px rgba(139, 92, 246, 0.1)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.8rem' }}>{currentTabInfo.icon} {currentTabInfo.label}</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>{currentTabInfo.tagline}</p>
+        </div>
 
-          <button className="glass" style={{ width: '100%', marginTop: '1.5rem', padding: '1rem', borderRadius: '16px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            Upload New Chat →
+        <div className={`action-area ${activeTab === 'awkward' ? 'single-col' : ''}`}>
+          {/* File Upload (Hidden for Awkward Situations) */}
+          {activeTab !== 'awkward' && (
+            <div className="file-drop" onClick={() => alert("File upload functionality to be linked to storage bucket later.")}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📤</div>
+              <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Click or drag file here</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Supports JPG, PNG (Max 5MB)</div>
+            </div>
+          )}
+
+          {/* Text Input */}
+          <textarea 
+            className="glass-input" 
+            placeholder={
+              activeTab === 'reply' ? '...Or type the last few messages here:\nThem: Hey what are you up to?\nYou: Nothing much just chillin\nThem: Cool, I am so bored rn' :
+              activeTab === 'starter' ? '...Or describe their bio/interests:\n"Loves hiking, coffee, and golden retrievers. Just moved to the city."' :
+              'Describe the exact situation here. For example:\n"I accidentally texted my manager something meant for my friend about how annoying the meeting was. What do I say to fix this without looking bad?"'
+            }
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+          />
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <button 
+            className="gradient-bg" 
+            disabled={!inputText && !file || isLoading}
+            onClick={handleProcess}
+            style={{ 
+              padding: '1.2rem 3rem', 
+              borderRadius: '16px', 
+              color: '#fff', 
+              fontWeight: '700', 
+              fontSize: '1.1rem',
+              border: 'none',
+              cursor: (!inputText && !file) || isLoading ? 'not-allowed' : 'pointer',
+              opacity: (!inputText && !file) || isLoading ? 0.6 : 1,
+              boxShadow: '0 10px 30px rgba(139, 92, 246, 0.3)',
+              transition: 'all 0.3s'
+            }}
+          >
+            {isLoading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span className="spinner" style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
+                Processing...
+              </span>
+            ) : 'Analyze with AI ✨'}
           </button>
-        </section>
-
-        {/* Daily Tips */}
-        <section>
-           <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Daily AI Tips</h2>
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-             {tips.map((tip, i) => (
-               <div key={i} className="glass" style={{ padding: '1.2rem', borderRadius: '20px', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                 <div style={{ color: 'var(--accent-purple)', fontSize: '1.2rem' }}>{tip.icon}</div>
-                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{tip.text}</p>
-               </div>
-             ))}
-           </div>
-        </section>
+        </div>
       </div>
+
+      {/* Results Box */}
+      {result && (
+        <div className="glass fade-in" style={{ marginTop: '3rem', padding: '3rem', borderRadius: '32px', background: 'rgba(139, 92, 246, 0.08)' }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ color: 'var(--accent-purple)' }}>✨</span> AI Output
+          </h3>
+          
+          {result.error ? (
+            <div style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '1.5rem', borderRadius: '16px' }}>
+              Error: {result.error}
+            </div>
+          ) : (
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {result.suggestions && Object.values(result.suggestions).map((res: any, idx) => (
+                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>
+                      Option {idx + 1}
+                    </div>
+                    <div style={{ fontSize: '1.1rem', color: '#fff', lineHeight: '1.5' }}>
+                      "{res.text || res}"
+                    </div>
+                  </div>
+                ))}
+             </div>
+          )}
+        </div>
+      )}
+      
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

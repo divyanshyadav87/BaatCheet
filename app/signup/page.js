@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -9,17 +10,40 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !password) return;
     
     setIsLoading(true);
+    setError(null);
     
-    // Simulate account creation for premium feel
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    router.push('/dashboard');
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name
+          }
+        }
+      });
+      
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+      
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err.message === 'Failed to fetch' 
+        ? 'Could not connect to the server. Please check your Supabase credentials in .env' 
+        : err.message || 'An unexpected error occurred.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,7 +69,7 @@ export default function SignupPage() {
         
         {/* Social Logins */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-          <button className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', border: 'none', color: '#fff' }}>
+          <button type="button" onClick={() => { setIsLoading(true); setTimeout(() => router.push('/dashboard'), 1500); }} className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', border: 'none', color: '#fff' }}>
             <span>🌎</span> Sign up with Google
           </button>
         </div>
@@ -58,6 +82,11 @@ export default function SignupPage() {
         
         {/* Form */}
         <form style={{ textAlign: 'left' }} onSubmit={handleSubmit}>
+          {error && (
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.8rem', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+              {error}
+            </div>
+          )}
           <div style={{ marginBottom: '1.2rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>FULL NAME</label>
             <input 
