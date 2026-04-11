@@ -226,7 +226,7 @@ export default function DashboardHome() {
             </div>
           ) : (
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {result.suggestions && Object.values(result.suggestions).map((res: any, idx) => (
+                {result.suggestions && Object.values(result.suggestions).map((res, idx) => (
                   <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px' }}>
                     <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>
                       Option {idx + 1}
