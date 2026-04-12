@@ -11,6 +11,38 @@ export default function DashboardHome() {
   const fileInputRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [encodedFile, setEncodedFile] = useState(null);
+  const [selectedTone, setSelectedTone] = useState('Smart');
+  const [copiedId, setCopiedId] = useState(null);
+
+  const handleCopy = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const toolTones = {
+    reply: [
+      { label: 'Flirty', emoji: '🔥' },
+      { label: 'Smart', emoji: '🧠' },
+      { label: 'Funny', emoji: '😂' },
+      { label: 'Mysterious', emoji: '💙' },
+      { label: 'Classy', emoji: '💎' },
+    ],
+    starter: [
+      { label: 'Creative', emoji: '🎨' },
+      { label: 'Deep', emoji: '🌊' },
+      { label: 'Cheesy', emoji: '🧀' },
+      { label: 'Direct', emoji: '🎯' },
+      { label: 'Friendly', emoji: '👋' },
+    ],
+    awkward: [
+      { label: 'Honest', emoji: '✨' },
+      { label: 'Funny', emoji: '😂' },
+      { label: 'Diplomatic', emoji: '🤝' },
+      { label: 'Apologetic', emoji: '🙏' },
+      { label: 'Professional', emoji: '💼' },
+    ]
+  };
 
   const tabs = [
     { id: 'reply', label: 'Reply Suggestions', icon: '💬', tagline: 'Upload a chat screenshot or type the exact conversation.' },
@@ -61,7 +93,8 @@ export default function DashboardHome() {
       const payload = {
         type: activeTab,
         context: inputText,
-        image: encodedFile
+        image: encodedFile,
+        tone: selectedTone
       };
 
       const response = await fetch('/api/unified-analyze', {
@@ -129,7 +162,7 @@ export default function DashboardHome() {
         }
         textarea.glass-input {
           width: 100%;
-          min-height: 200px;
+          min-height: 150px;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid var(--card-border);
           padding: 1.5rem;
@@ -151,7 +184,7 @@ export default function DashboardHome() {
           background: rgba(255, 255, 255, 0.02);
           border: 2px dashed rgba(255,255,255,0.1);
           border-radius: 20px;
-          min-height: 200px;
+          min-height: 150px;
           cursor: pointer;
           transition: all 0.3s;
           color: var(--text-secondary);
@@ -182,7 +215,16 @@ export default function DashboardHome() {
           <button
             key={tab.id}
             className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => { setActiveTab(tab.id); setResult(null); setInputText(''); clearFile(); }}
+            onClick={() => { 
+                setActiveTab(tab.id); 
+                setResult(null); 
+                setInputText(''); 
+                clearFile();
+                // Set default tone based on tab
+                if (tab.id === 'reply') setSelectedTone('Smart');
+                else if (tab.id === 'starter') setSelectedTone('Creative');
+                else if (tab.id === 'awkward') setSelectedTone('Diplomatic');
+            }}
           >
             <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
             {tab.label}
@@ -190,7 +232,7 @@ export default function DashboardHome() {
         ))}
       </div>
 
-      <div className="glass fade-in" style={{ padding: '3rem', borderRadius: '32px', border: '1px solid var(--accent-purple)', boxShadow: '0 10px 40px rgba(139, 92, 246, 0.1)' }}>
+      <div className="glass fade-in" style={{ padding: '2rem', borderRadius: '32px', border: '1px solid var(--accent-purple)', boxShadow: '0 10px 40px rgba(139, 92, 246, 0.1)' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.8rem' }}>{currentTabInfo.icon} {currentTabInfo.label}</h2>
           <p style={{ color: 'var(--text-secondary)' }}>{currentTabInfo.tagline}</p>
@@ -237,7 +279,7 @@ export default function DashboardHome() {
                 </div>
               ) : (
                 <>
-                  <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📤</div>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>📤</div>
                   <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Click or drag file here</div>
                   <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Supports JPG, PNG (Max 5MB)</div>
                 </>
@@ -256,6 +298,57 @@ export default function DashboardHome() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
           />
+        </div>
+
+        {/* Tone Selector */}
+        <div style={{ marginTop: '2.5rem' }}>
+          <label style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '1rem', display: 'block', textAlign: 'center' }}>
+            Select Response Style
+          </label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', justifyContent: 'center', marginBottom: '2rem' }}>
+            {toolTones[activeTab]?.map((t) => (
+              <button 
+                key={t.label}
+                onClick={() => setSelectedTone(t.label)}
+                style={{ 
+                  padding: '0.6rem 1.4rem', 
+                  borderRadius: '100px', 
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  transition: 'all 0.2s',
+                  backgroundColor: selectedTone === t.label ? 'rgba(139, 92, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: selectedTone === t.label ? '1px solid var(--accent-purple)' : '1px solid transparent',
+                  color: selectedTone === t.label ? '#fff' : 'var(--text-secondary)',
+                  cursor: 'pointer'
+                }}
+              >
+                {t.emoji} {t.label}
+              </button>
+            ))}
+            <div style={{ 
+              padding: '0.6rem 1.4rem', 
+              borderRadius: '100px', 
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              color: 'rgba(255, 255, 255, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.02)',
+              cursor: 'not-allowed'
+            }}>
+              PRO styles coming 🔒
+            </div>
+          </div>
+          
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', letterSpacing: '0.05em' }}>
+              ⚡ WANT UNLIMITED REPLIES? <span className="gradient-text" style={{ cursor: 'pointer' }}>JOIN PRO WAITLIST →</span>
+            </span>
+          </div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
@@ -283,6 +376,9 @@ export default function DashboardHome() {
               </span>
             ) : 'Analyze with AI ✨'}
           </button>
+          <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+            7 USES LEFT TODAY
+          </p>
         </div>
       </div>
 
@@ -300,11 +396,32 @@ export default function DashboardHome() {
           ) : (
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {result.suggestions && Object.values(result.suggestions).map((res, idx) => (
-                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px' }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>
-                      Option {idx + 1}
+                  <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px', position: 'relative', transition: 'all 0.3s' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Option {idx + 1}
+                      </div>
+                      <button 
+                        onClick={() => handleCopy(res.text || res, idx)}
+                        style={{ 
+                          background: 'rgba(255,255,255,0.05)', 
+                          border: '1px solid rgba(255,255,255,0.1)', 
+                          color: copiedId === idx ? '#10b981' : 'var(--text-secondary)', 
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '8px',
+                          cursor: 'pointer', 
+                          fontSize: '0.75rem', 
+                          fontWeight: '600',
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.4rem',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {copiedId === idx ? '✓ Copied' : '📋 Copy'}
+                      </button>
                     </div>
-                    <div style={{ fontSize: '1.1rem', color: '#fff', lineHeight: '1.5' }}>
+                    <div style={{ fontSize: '1.1rem', color: '#fff', lineHeight: '1.5', paddingRight: '1rem' }}>
                       "{res.text || res}"
                     </div>
                   </div>

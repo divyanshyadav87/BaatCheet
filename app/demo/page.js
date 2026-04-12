@@ -40,7 +40,7 @@ export default function DemoPage() {
             
             {/* Upload Zone */}
             <div style={{ 
-              height: '200px', 
+              height: '150px', 
               border: '2px dashed var(--card-border)', 
               borderRadius: '24px', 
               display: 'flex', 
@@ -53,7 +53,7 @@ export default function DemoPage() {
               marginBottom: '2rem',
               backgroundColor: 'rgba(255, 255, 255, 0.02)'
             }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--accent-purple)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}>
-              <span style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🖼️</span>
+              <span style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>🖼️</span>
               <span style={{ fontWeight: '500' }}>Tap to add photo</span>
             </div>
 
