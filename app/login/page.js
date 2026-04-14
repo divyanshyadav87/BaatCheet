@@ -26,15 +26,22 @@ export default function LoginPage() {
       });
       
       if (error) {
-        setError(error.message);
+        if (error.message.includes('Email not confirmed')) {
+          setError('Please confirm your email address before logging in. Check your inbox for the confirmation link.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(error.message);
+        }
         setIsLoading(false);
         return;
       }
       
       router.push('/dashboard');
     } catch (err) {
-      setError(err.message === 'Failed to fetch' 
-        ? 'Could not connect to the server. Please check your Supabase credentials in .env' 
+      const isNetworkError = err.message === 'Failed to fetch' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+      setError(isNetworkError 
+        ? 'Connection error: Please ensure you have added your Supabase environment variables in the Vercel/Project settings.' 
         : err.message || 'An unexpected error occurred.');
       setIsLoading(false);
     }

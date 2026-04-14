@@ -37,7 +37,10 @@ export default function SignupPage() {
         return;
       }
       
-      router.push('/dashboard');
+      // If email confirmation is enabled, we should tell them to check their inbox
+      setError('success: Account created! Please check your email inbox for a confirmation link before logging in.');
+      setIsLoading(false);
+      // router.push('/dashboard'); // Removed auto-redirect as they need to confirm email first
     } catch (err) {
       setError(err.message === 'Failed to fetch' 
         ? 'Could not connect to the server. Please check your Supabase credentials in .env' 
@@ -83,8 +86,16 @@ export default function SignupPage() {
         {/* Form */}
         <form style={{ textAlign: 'left' }} onSubmit={handleSubmit}>
           {error && (
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.8rem', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-              {error}
+            <div style={{ 
+              background: error.startsWith('success:') ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+              border: `1px solid ${error.startsWith('success:') ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, 
+              color: error.startsWith('success:') ? '#22c55e' : '#ef4444', 
+              padding: '0.8rem', 
+              borderRadius: '12px', 
+              marginBottom: '1.5rem', 
+              fontSize: '0.9rem' 
+            }}>
+              {error.startsWith('success:') ? error.replace('success: ', '') : error}
             </div>
           )}
           <div style={{ marginBottom: '1.2rem' }}>
