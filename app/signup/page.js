@@ -2,49 +2,31 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password) return;
+    if (!email) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name
-          }
-        }
-      });
+      // Store email in localStorage — no authentication needed
+      localStorage.setItem('baatcheet_user_email', email);
+      localStorage.setItem('baatcheet_logged_in', 'true');
       
-      if (error) {
-        setError(error.message);
-        setIsLoading(false);
-        return;
-      }
-      
-      // If email confirmation is enabled, we should tell them to check their inbox
-      setError('success: Account created! Please check your email inbox for a confirmation link before logging in.');
-      setIsLoading(false);
-      // router.push('/dashboard'); // Removed auto-redirect as they need to confirm email first
+      // Short delay for UX smoothness
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
     } catch (err) {
-      setError(err.message === 'Failed to fetch' 
-        ? 'Could not connect to the server. Please check your Supabase credentials in .env' 
-        : err.message || 'An unexpected error occurred.');
+      setError('Something went wrong. Please try again.');
       setIsLoading(false);
     }
   };
@@ -68,48 +50,16 @@ export default function SignupPage() {
         </Link>
         
         <h1 className="auth-title" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem' }}>Create Account</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Start your premium social experience today</p>
-        
-        {/* Social Logins */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-          <button type="button" onClick={() => { setIsLoading(true); setTimeout(() => router.push('/dashboard'), 1500); }} className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', border: 'none', color: '#fff' }}>
-            <span>🌎</span> Sign up with Google
-          </button>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'rgba(255, 255, 255, 0.1)', marginBottom: '2rem' }}>
-          <div style={{ flex: 1, height: '1px', background: 'currentColor' }}></div>
-          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>OR</span>
-          <div style={{ flex: 1, height: '1px', background: 'currentColor' }}></div>
-        </div>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Enter your email to start your premium social experience</p>
         
         {/* Form */}
         <form style={{ textAlign: 'left' }} onSubmit={handleSubmit}>
           {error && (
-            <div style={{ 
-              background: error.startsWith('success:') ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-              border: `1px solid ${error.startsWith('success:') ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, 
-              color: error.startsWith('success:') ? '#22c55e' : '#ef4444', 
-              padding: '0.8rem', 
-              borderRadius: '12px', 
-              marginBottom: '1.5rem', 
-              fontSize: '0.9rem' 
-            }}>
-              {error.startsWith('success:') ? error.replace('success: ', '') : error}
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.8rem', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+              {error}
             </div>
           )}
-          <div style={{ marginBottom: '1.2rem' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>FULL NAME</label>
-            <input 
-              required
-              type="text" 
-              placeholder="Jack Sparrow" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{ width: '100%', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: '#fff', outline: 'none' }} 
-            />
-          </div>
-          <div style={{ marginBottom: '1.2rem' }}>
+          <div style={{ marginBottom: '2rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>EMAIL ADDRESS</label>
             <input 
               required
@@ -117,17 +67,6 @@ export default function SignupPage() {
               placeholder="jack@example.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: '#fff', outline: 'none' }} 
-            />
-          </div>
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>PASSWORD</label>
-            <input 
-              required
-              type="password" 
-              placeholder="••••••••" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               style={{ width: '100%', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: '#fff', outline: 'none' }} 
             />
           </div>

@@ -1,8 +1,15 @@
 "use client";
+import { useState, useEffect } from 'react';
 
 export default function ProfilePage() {
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('baatcheet_user_email') || 'user@email.com';
+    setEmail(storedEmail);
+  }, []);
+
   const profileSettings = [
-    { label: 'Account Settings', icon: '⚙️', sub: 'Manage your account details' },
     { label: 'Notifications', icon: '🔔', sub: 'Configure notification preferences' },
     { label: 'Privacy & Security', icon: '🛡️', sub: 'Manage your data and security' },
     { label: 'Subscription', icon: '👑', sub: 'Pro Plan · Renews Jan 15, 2025' },
@@ -17,16 +24,19 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-            <div style={{ width: '100px', height: '100px', borderRadius: '30px', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>U</div>
+            <div style={{ width: '100px', height: '100px', borderRadius: '30px', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>
+              {email ? email[0].toUpperCase() : 'U'}
+            </div>
             <div>
-               <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.4rem' }}>User Name</h2>
-               <div style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>📧 user@email.com</div>
+               <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.4rem' }}>
+                 {email.split('@')[0] || 'User'}
+               </h2>
+               <div style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>📧 {email}</div>
                <div className="glass" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 'bold' }}>
                   👑 Pro Plan
                </div>
             </div>
          </div>
-         <button className="glass" style={{ padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: '600' }}>Edit Profile</button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

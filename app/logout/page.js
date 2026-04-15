@@ -7,6 +7,10 @@ export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Clear user session from localStorage
+    localStorage.removeItem('baatcheet_user_email');
+    localStorage.removeItem('baatcheet_logged_in');
+
     const timer = setTimeout(() => {
       router.push('/');
     }, 3000);

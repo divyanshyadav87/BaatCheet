@@ -2,47 +2,31 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Store email in localStorage — no authentication needed
+      localStorage.setItem('baatcheet_user_email', email);
+      localStorage.setItem('baatcheet_logged_in', 'true');
       
-      if (error) {
-        if (error.message.includes('Email not confirmed')) {
-          setError('Please confirm your email address before logging in. Check your inbox for the confirmation link.');
-        } else if (error.message.includes('Invalid login credentials')) {
-          setError('Invalid email or password. Please try again.');
-        } else {
-          setError(error.message);
-        }
-        setIsLoading(false);
-        return;
-      }
-      
-      router.push('/dashboard');
+      // Short delay for UX smoothness
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
     } catch (err) {
-      const isNetworkError = err.message === 'Failed to fetch' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
-      setError(isNetworkError 
-        ? 'Connection error: Please ensure you have added your Supabase environment variables in the Vercel/Project settings.' 
-        : err.message || 'An unexpected error occurred.');
+      setError('Something went wrong. Please try again.');
       setIsLoading(false);
     }
   };
@@ -66,23 +50,7 @@ export default function LoginPage() {
         </Link>
         
         <h1 className="auth-title" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem' }}>Welcome Back</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Sign in to continue your social journey</p>
-        
-        {/* Social Logins */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-          <button type="button" onClick={() => { setIsLoading(true); setTimeout(() => router.push('/dashboard'), 1000); }} className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', border: 'none', color: '#fff' }}>
-            <span>🌎</span> Continue with Google
-          </button>
-          <button type="button" onClick={() => { setIsLoading(true); setTimeout(() => router.push('/dashboard'), 1000); }} className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', border: 'none', color: '#fff' }}>
-            <span>🍎</span> Continue with Apple
-          </button>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'rgba(255, 255, 255, 0.1)', marginBottom: '2rem' }}>
-          <div style={{ flex: 1, height: '1px', background: 'currentColor' }}></div>
-          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>OR</span>
-          <div style={{ flex: 1, height: '1px', background: 'currentColor' }}></div>
-        </div>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Enter your email to continue your social journey</p>
         
         {/* Form */}
         <form style={{ textAlign: 'left' }} onSubmit={handleSubmit}>
@@ -91,7 +59,7 @@ export default function LoginPage() {
               {error}
             </div>
           )}
-          <div style={{ marginBottom: '1.2rem' }}>
+          <div style={{ marginBottom: '2rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>EMAIL ADDRESS</label>
             <input 
               required
@@ -99,20 +67,6 @@ export default function LoginPage() {
               placeholder="jack@example.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: '#fff', outline: 'none' }} 
-            />
-          </div>
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)' }}>PASSWORD</label>
-              <Link href="#" style={{ fontSize: '0.75rem', color: 'var(--accent-purple)', fontWeight: '600' }}>Forgot password?</Link>
-            </div>
-            <input 
-              required
-              type="password" 
-              placeholder="••••••••" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               style={{ width: '100%', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: '#fff', outline: 'none' }} 
             />
           </div>
@@ -158,4 +112,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

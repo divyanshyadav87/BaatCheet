@@ -107,6 +107,23 @@ export default function DashboardHome() {
       
       if (response.ok) {
         setResult(data);
+        
+        // Save to localStorage history
+        try {
+          const historyEntry = {
+            id: Date.now().toString(),
+            type: activeTab,
+            context: inputText || 'Image uploaded',
+            result: JSON.stringify(data),
+            tone: selectedTone,
+            created_at: new Date().toISOString()
+          };
+          const existing = JSON.parse(localStorage.getItem('baatcheet_history') || '[]');
+          existing.unshift(historyEntry);
+          localStorage.setItem('baatcheet_history', JSON.stringify(existing));
+        } catch (storageErr) {
+          console.warn("Could not save to history:", storageErr);
+        }
       } else {
         setResult({ error: data.error || 'Something went wrong.' });
       }
@@ -398,8 +415,18 @@ export default function DashboardHome() {
                 {result.suggestions && Object.values(result.suggestions).map((res, idx) => (
                   <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px', position: 'relative', transition: 'all 0.3s' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         Option {idx + 1}
+                        <span style={{ 
+                          fontSize: '0.65rem', 
+                          padding: '0.2rem 0.6rem', 
+                          borderRadius: '100px', 
+                          background: idx < 2 ? 'rgba(59, 130, 246, 0.15)' : 'rgba(249, 115, 22, 0.15)',
+                          color: idx < 2 ? '#60a5fa' : '#fb923c',
+                          border: `1px solid ${idx < 2 ? 'rgba(59, 130, 246, 0.3)' : 'rgba(249, 115, 22, 0.3)'}`
+                        }}>
+                          {idx < 2 ? '🇬🇧 English' : '🇮🇳 Hinglish'}
+                        </span>
                       </div>
                       <button 
                         onClick={() => handleCopy(res.text || res, idx)}
