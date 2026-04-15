@@ -100,7 +100,7 @@ export default function Home() {
           <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Simple <span className="gradient-text">Pricing</span></h2>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '700px', margin: '0 auto' }}>
           {/* Free Tier */}
           <div className="glass" style={{ padding: '3rem 2rem', borderRadius: '24px', display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Free</h3>
@@ -126,7 +126,7 @@ export default function Home() {
           }}>
             <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: 'var(--gradient-primary)', padding: '0.3rem 1rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 'bold' }}>MOST POPULAR</div>
             <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Pro</h3>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '2rem' }}>₹499<span style={{ fontSize: '1rem', fontWeight: '400', color: 'var(--text-secondary)' }}>/month</span></div>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '2rem' }}>₹99<span style={{ fontSize: '1rem', fontWeight: '400', color: 'var(--text-secondary)' }}>/month</span></div>
             <ul style={{ listStyle: 'none', marginBottom: '3rem', flex: 1 }}>
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Unlimited chats</li>
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Advanced AI analysis</li>
@@ -134,19 +134,6 @@ export default function Home() {
               <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Priority support</li>
             </ul>
             <Link href="/login" className="gradient-bg" style={{ display: 'block', textAlign: 'center', padding: '1rem', borderRadius: '12px', fontWeight: '700', color: '#fff' }}>Go Pro</Link>
-          </div>
-
-          {/* Elite Tier */}
-          <div className="glass" style={{ padding: '3rem 2rem', borderRadius: '24px', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Elite</h3>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '2rem' }}>₹999<span style={{ fontSize: '1rem', fontWeight: '400', color: 'var(--text-secondary)' }}>/month</span></div>
-            <ul style={{ listStyle: 'none', marginBottom: '3rem', flex: 1 }}>
-              <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Everything in Pro</li>
-              <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> 1-on-1 AI coaching</li>
-              <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> Custom personality</li>
-              <li style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#10b981' }}>✓</span> White-glove onboarding</li>
-            </ul>
-            <Link href="/login" className="glass" style={{ display: 'block', textAlign: 'center', padding: '1rem', borderRadius: '12px', fontWeight: '600' }}>Go Elite</Link>
           </div>
         </div>
       </section>
