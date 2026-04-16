@@ -6,6 +6,14 @@ export default function HistoryPage() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+
+  const handleCopy = (e, text, id) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   useEffect(() => {
     async function fetchHistory() {
@@ -159,14 +167,33 @@ export default function HistoryPage() {
                        <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--accent-purple)', marginBottom: '0.5rem', fontWeight: 'bold' }}>AI Suggestions</h4>
                        <div style={{ display: 'grid', gap: '0.8rem' }}>
                          {parsedResult && parsedResult.suggestions ? (
-                           parsedResult.suggestions.map((sug, i) => (
-                             <div key={i} style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)', fontSize: '0.95rem' }}>
-                               {sug.text || sug}
+                           parsedResult.suggestions.map((sug, i) => {
+                             const suggestionText = sug.text || sug;
+                             const uniqueId = `${item.id}-${i}`;
+                             return (
+                             <div key={i} style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)', fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                               <div style={{ flex: 1 }}>{suggestionText}</div>
+                               <button 
+                                 onClick={(e) => handleCopy(e, suggestionText, uniqueId)}
+                                 style={{ 
+                                   background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: copiedId === uniqueId ? '#10b981' : 'var(--text-secondary)', padding: '0.4rem 0.8rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s', flexShrink: 0
+                                 }}
+                               >
+                                 {copiedId === uniqueId ? '✓ Copied' : '📋 Copy'}
+                               </button>
                              </div>
-                           ))
+                           )})
                          ) : (
-                           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', fontSize: '0.95rem' }}>
-                             {item.result}
+                           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                             <div style={{ flex: 1 }}>{item.result}</div>
+                             <button 
+                               onClick={(e) => handleCopy(e, item.result, `${item.id}-fallback`)}
+                               style={{ 
+                                 background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: copiedId === `${item.id}-fallback` ? '#10b981' : 'var(--text-secondary)', padding: '0.4rem 0.8rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s', flexShrink: 0
+                               }}
+                             >
+                               {copiedId === `${item.id}-fallback` ? '✓ Copied' : '📋 Copy'}
+                             </button>
                            </div>
                          )}
                        </div>
