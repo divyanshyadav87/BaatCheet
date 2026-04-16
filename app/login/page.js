@@ -21,6 +21,13 @@ export default function LoginPage() {
       localStorage.setItem('baatcheet_user_email', email);
       localStorage.setItem('baatcheet_logged_in', 'true');
       
+      // Store in supabase asynchronously without blocking login
+      fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, type: 'login' })
+      }).catch(console.error);
+      
       // Short delay for UX smoothness
       setTimeout(() => {
         router.push('/dashboard');

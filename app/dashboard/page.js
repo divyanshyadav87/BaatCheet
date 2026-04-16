@@ -86,15 +86,14 @@ export default function DashboardHome() {
     setResult(null);
     
     try {
-      // In a production scenario with file uploads, you would use FormData.
-      // For this unified tool, we will send everything as JSON for now (if text).
-      // A dedicated server action or API route handles the actual Gemini request.
+      const userEmail = localStorage.getItem('baatcheet_user_email') || '';
       
       const payload = {
         type: activeTab,
         context: inputText,
         image: encodedFile,
-        tone: selectedTone
+        tone: selectedTone,
+        email: userEmail
       };
 
       const response = await fetch('/api/unified-analyze', {
@@ -107,23 +106,6 @@ export default function DashboardHome() {
       
       if (response.ok) {
         setResult(data);
-        
-        // Save to localStorage history
-        try {
-          const historyEntry = {
-            id: Date.now().toString(),
-            type: activeTab,
-            context: inputText || 'Image uploaded',
-            result: JSON.stringify(data),
-            tone: selectedTone,
-            created_at: new Date().toISOString()
-          };
-          const existing = JSON.parse(localStorage.getItem('baatcheet_history') || '[]');
-          existing.unshift(historyEntry);
-          localStorage.setItem('baatcheet_history', JSON.stringify(existing));
-        } catch (storageErr) {
-          console.warn("Could not save to history:", storageErr);
-        }
       } else {
         setResult({ error: data.error || 'Something went wrong.' });
       }

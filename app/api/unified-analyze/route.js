@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/app/lib/ai';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req) {
   try {
-    const { type, context, image, tone } = await req.json();
+    const { type, context, image, tone, email } = await req.json();
     
     if (!context && !image) {
       return NextResponse.json({ error: 'Please provide either text context or an image to analyze.' }, { status: 400 });
@@ -25,21 +26,40 @@ export async function POST(req) {
 
     const aiResultString = await generateAIResponse(prompt, image);
     
-    // We expect the AI to return a JSON string based on the prompt.
     const cleanJson = aiResultString.replace(/```json/gi, '').replace(/```/g, '').trim();
     
     let aiResponse;
     try {
       aiResponse = JSON.parse(cleanJson);
-      // Ensure the format matches what the frontend expects
       if (!aiResponse.suggestions || !Array.isArray(aiResponse.suggestions)) {
-          // If the AI gives weird JSON keys, just shove values inside suggestions
           aiResponse = { suggestions: Object.values(aiResponse) };
       }
     } catch (parseError) {
-      // Fallback if AI fails to return proper JSON at all
       console.warn("Could not parse AI JSON, returning string literal");
       aiResponse = { suggestions: [cleanJson] };
+    }
+
+    // Save to Supabase if email is provided
+    if (email) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.SUPABASE_SERVICE_ROLE_KEY
+        );
+        const { error: insertError } = await supabase.from('analyses').insert({
+          email: email,
+          type: type,
+          context: context || 'Image uploaded',
+          result: JSON.stringify(aiResponse),
+          tone: tone || 'Default'
+        });
+        
+        if (insertError) {
+          console.error("Supabase insert error:", insertError);
+        }
+      } catch (dbError) {
+        console.error("Could not save to database:", dbError.message);
+      }
     }
 
     return NextResponse.json(aiResponse, { status: 200 });
