@@ -1,13 +1,35 @@
 "use client";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function DashboardHome() {
   const [activeTab, setActiveTab] = useState('reply'); 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
   
+  const [remainingUses, setRemainingUses] = useState(7);
+  const [showProModal, setShowProModal] = useState(false);
+
+  useEffect(() => {
+    fetchUsage();
+  }, []);
+
+  const fetchUsage = async () => {
+    try {
+      const email = localStorage.getItem('baatcheet_user_email');
+      if (!email) return;
+      const res = await fetch(`/api/usage?email=${encodeURIComponent(email)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setRemainingUses(data.remaining);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const fileInputRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [encodedFile, setEncodedFile] = useState(null);
@@ -82,6 +104,11 @@ export default function DashboardHome() {
 
   const handleProcess = async () => {
     if (!inputText && !encodedFile) return;
+    if (remainingUses <= 0) {
+      setShowProModal(true);
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
     
@@ -106,7 +133,12 @@ export default function DashboardHome() {
       
       if (response.ok) {
         setResult(data);
+        fetchUsage();
       } else {
+        if (data.limitExceeded) {
+          setShowProModal(true);
+          setRemainingUses(0);
+        }
         setResult({ error: data.error || 'Something went wrong.' });
       }
     } catch (e) {
@@ -199,6 +231,50 @@ export default function DashboardHome() {
         .fade-in {
           animation: fadeIn 0.4s ease forwards;
         }
+
+        /* Mobile Tab Dropdown Styles */
+        .tabs-container {
+          display: flex; 
+          gap: 0.8rem; 
+          justify-content: center; 
+          margin-bottom: 2rem;
+          flex-direction: column;
+          width: 100%;
+          max-width: 320px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .mobile-chevron {
+          display: inline-block;
+          font-size: 0.8rem;
+          opacity: 0.7;
+        }
+        @media (min-width: 768px) {
+          .tabs-container {
+            flex-direction: row;
+            max-width: none;
+          }
+          .mobile-hidden {
+            display: flex !important;
+          }
+          .mobile-chevron {
+            display: none !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .mobile-hidden {
+            display: none !important;
+          }
+          .tab-button {
+            width: 100%;
+            justify-content: space-between;
+            padding: 1.2rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+          }
+          .tab-button.active {
+             border-color: rgba(139, 92, 246, 0.5);
+          }
+        }
       `}</style>
       
       <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
@@ -209,26 +285,41 @@ export default function DashboardHome() {
       </header>
 
       {/* Tab Selectors */}
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => { 
-                setActiveTab(tab.id); 
-                setResult(null); 
-                setInputText(''); 
-                clearFile();
-                // Set default tone based on tab
-                if (tab.id === 'reply') setSelectedTone('Smart');
-                else if (tab.id === 'starter') setSelectedTone('Creative');
-                else if (tab.id === 'awkward') setSelectedTone('Diplomatic');
-            }}
-          >
-            <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
-            {tab.label}
-          </button>
-        ))}
+      <div className="tabs-container">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              className={`tab-button ${isActive ? 'active' : ''} ${!isActive && !isMobileMenuOpen ? 'mobile-hidden' : ''}`}
+              onClick={() => { 
+                if (isActive) {
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                } else {
+                  setActiveTab(tab.id); 
+                  setIsMobileMenuOpen(false);
+                  setResult(null); 
+                  setInputText(''); 
+                  clearFile();
+                  // Set default tone based on tab
+                  if (tab.id === 'reply') setSelectedTone('Smart');
+                  else if (tab.id === 'starter') setSelectedTone('Creative');
+                  else if (tab.id === 'awkward') setSelectedTone('Diplomatic');
+                }
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
+                {tab.label}
+              </div>
+              {isActive && (
+                <span className="mobile-chevron" style={{ transform: isMobileMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}>
+                  ▼
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <div className="glass fade-in" style={{ padding: '2rem', borderRadius: '32px', border: '1px solid var(--accent-purple)', boxShadow: '0 10px 40px rgba(139, 92, 246, 0.1)' }}>
@@ -345,7 +436,7 @@ export default function DashboardHome() {
           
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', letterSpacing: '0.05em' }}>
-              ⚡ WANT UNLIMITED REPLIES? <span className="gradient-text" style={{ cursor: 'pointer' }}>JOIN PRO WAITLIST →</span>
+              ⚡ WANT UNLIMITED REPLIES? <span className="gradient-text" style={{ cursor: 'pointer' }} onClick={() => setShowProModal(true)}>BUY PRO NOW →</span>
             </span>
           </div>
         </div>
@@ -376,7 +467,7 @@ export default function DashboardHome() {
             ) : 'Analyze with AI ✨'}
           </button>
           <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
-            7 USES LEFT TODAY
+            {remainingUses} {remainingUses === 1 ? 'USE' : 'USES'} LEFT TODAY
           </p>
         </div>
       </div>
@@ -440,6 +531,82 @@ export default function DashboardHome() {
         </div>
       )}
       
+      {/* PRO Modal */}
+      {showProModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1rem'
+        }}>
+          <div className="glass fade-in" style={{
+            background: 'linear-gradient(145deg, rgba(30, 30, 30, 0.9), rgba(15, 15, 15, 0.95))',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            borderRadius: '24px',
+            padding: '3rem 2rem',
+            maxWidth: '400px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 20px 60px rgba(139, 92, 246, 0.2)',
+            position: 'relative'
+          }}>
+            <button 
+              onClick={() => setShowProModal(false)}
+              style={{
+                position: 'absolute', top: '15px', right: '15px',
+                background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1.5rem'
+              }}
+            >
+              ×
+            </button>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💎</div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.8rem' }} className="gradient-text">
+              PRO Mode
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>
+              You've reached your free daily limit! Unlock unlimited AI replies, premium style tones, and priority support by upgrading to PRO.
+            </p>
+            <button 
+              className="gradient-bg"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                borderRadius: '12px',
+                border: 'none',
+                color: '#fff',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
+                transform: 'translateY(0)',
+                transition: 'all 0.3s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              onClick={() => {
+                 alert('Redirecting to secure checkout...');
+                 setShowProModal(false);
+              }}
+            >
+              Upgrade to PRO - ₹499/mo
+            </button>
+            <button 
+              onClick={() => setShowProModal(false)}
+              style={{
+                background: 'transparent', border: 'none', color: 'var(--text-secondary)', marginTop: '1.5rem', fontSize: '0.9rem', cursor: 'pointer', textDecoration: 'underline'
+              }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

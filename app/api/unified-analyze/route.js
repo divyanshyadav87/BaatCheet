@@ -24,6 +24,31 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Invalid analysis type' }, { status: 400 });
     }
 
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    // Check limit before generating
+    if (email && supabaseUrl && supabaseKey) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const { count, error } = await supabase
+          .from('analyses')
+          .select('*', { count: 'exact', head: true })
+          .eq('email', email)
+          .gte('created_at', today.toISOString());
+          
+        if (!error && count >= 7) {
+          return NextResponse.json({ error: 'Daily limit of 7 replies reached. Please upgrade to PRO mode to unlock unlimited replies.', limitExceeded: true }, { status: 403 });
+        }
+      } catch (checkError) {
+        console.error("Limit check error:", checkError);
+        // Fail open if db is unreachable
+      }
+    }
+
     const aiResultString = await generateAIResponse(prompt, image);
     
     const cleanJson = aiResultString.replace(/```json/gi, '').replace(/```/g, '').trim();
