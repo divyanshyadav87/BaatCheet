@@ -277,7 +277,9 @@ export default function DashboardHome() {
         }
       `}</style>
       
-      <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
+      {(!result || result.error) ? (
+        <div className="fade-in">
+          <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.5rem' }}>
           Your <span className="gradient-text">AI Arsenal</span>
         </h1>
@@ -472,18 +474,33 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Results Box */}
-      {result && (
-        <div className="glass fade-in" style={{ marginTop: '3rem', padding: '3rem', borderRadius: '32px', background: 'rgba(139, 92, 246, 0.08)' }}>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <span style={{ color: 'var(--accent-purple)' }}>✨</span> AI Output
-          </h3>
-          
-          {result.error ? (
-            <div style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '1.5rem', borderRadius: '16px' }}>
-              Error: {result.error}
-            </div>
-          ) : (
+      {result?.error && (
+        <div className="fade-in" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', textAlign: 'center' }}>
+          <strong>Error:</strong> {result.error}
+        </div>
+      )}
+      </div>
+      ) : (
+        <div className="fade-in" style={{ paddingTop: '1rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+          <button 
+            onClick={() => { setResult(null); setInputText(''); clearFile(); }}
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1.5rem', borderRadius: '100px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', transition: 'all 0.3s', fontWeight: '600'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+          >
+            ← Generate New Analysis
+          </button>
+
+          <header style={{ marginBottom: '2rem', textAlign: 'left' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span className="gradient-text">AI Output</span> ✨
+            </h2>
+            <p style={{ color: 'var(--text-secondary)' }}>Here are your customized suggestions</p>
+          </header>
+
+          <div className="glass" style={{ padding: '2rem', borderRadius: '32px', border: '1px solid var(--accent-purple)', boxShadow: '0 10px 40px rgba(139, 92, 246, 0.15)' }}>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {result.suggestions && Object.values(result.suggestions).map((res, idx) => (
                   <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px', position: 'relative', transition: 'all 0.3s' }}>
@@ -491,12 +508,7 @@ export default function DashboardHome() {
                       <div style={{ fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         Option {idx + 1}
                         <span style={{ 
-                          fontSize: '0.65rem', 
-                          padding: '0.2rem 0.6rem', 
-                          borderRadius: '100px', 
-                          background: idx < 2 ? 'rgba(59, 130, 246, 0.15)' : 'rgba(249, 115, 22, 0.15)',
-                          color: idx < 2 ? '#60a5fa' : '#fb923c',
-                          border: `1px solid ${idx < 2 ? 'rgba(59, 130, 246, 0.3)' : 'rgba(249, 115, 22, 0.3)'}`
+                          fontSize: '0.65rem', padding: '0.2rem 0.6rem', borderRadius: '100px', background: idx < 2 ? 'rgba(59, 130, 246, 0.15)' : 'rgba(249, 115, 22, 0.15)', color: idx < 2 ? '#60a5fa' : '#fb923c', border: `1px solid ${idx < 2 ? 'rgba(59, 130, 246, 0.3)' : 'rgba(249, 115, 22, 0.3)'}`
                         }}>
                           {idx < 2 ? '🇬🇧 English' : '🇮🇳 Hinglish'}
                         </span>
@@ -504,18 +516,7 @@ export default function DashboardHome() {
                       <button 
                         onClick={() => handleCopy(res.text || res, idx)}
                         style={{ 
-                          background: 'rgba(255,255,255,0.05)', 
-                          border: '1px solid rgba(255,255,255,0.1)', 
-                          color: copiedId === idx ? '#10b981' : 'var(--text-secondary)', 
-                          padding: '0.4rem 0.8rem',
-                          borderRadius: '8px',
-                          cursor: 'pointer', 
-                          fontSize: '0.75rem', 
-                          fontWeight: '600',
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '0.4rem',
-                          transition: 'all 0.2s'
+                          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: copiedId === idx ? '#10b981' : 'var(--text-secondary)', padding: '0.4rem 0.8rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s'
                         }}
                       >
                         {copiedId === idx ? '✓ Copied' : '📋 Copy'}
@@ -527,7 +528,7 @@ export default function DashboardHome() {
                   </div>
                 ))}
              </div>
-          )}
+          </div>
         </div>
       )}
       
